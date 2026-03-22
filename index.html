@@ -175,6 +175,40 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
 /* ── DONE ── */
 #s-done{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:3rem 2rem;text-align:center;animation:fadeUp .4s ease both}
 .done-ring{width:110px;height:110px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:44px;margin-bottom:26px;animation:glow 2.2s ease infinite}
+/* 영수증 */
+.receipt-wrap{background:#FAF8F2;border-radius:4px;overflow:hidden;color:#1A1A1A;font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif}
+.receipt-top{background:#0C1810;padding:24px 24px 20px;text-align:center}
+.receipt-brand{font-size:11px;letter-spacing:.28em;color:#5A8A5A;text-transform:uppercase;margin-bottom:8px}
+.receipt-title{font-size:1.6rem;font-weight:300;color:#E2D9C4;margin-bottom:4px}
+.receipt-date{font-size:11px;color:#5A7A5A;letter-spacing:.08em}
+.receipt-mid{padding:20px 24px}
+.receipt-name-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px dashed #D4CFC8}
+.receipt-label{font-size:11px;letter-spacing:.12em;color:#8A8A7A;text-transform:uppercase}
+.receipt-value{font-size:15px;font-weight:500;color:#1A1A1A}
+.receipt-fam-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px dashed #D4CFC8}
+.receipt-sec{font-size:10px;letter-spacing:.18em;color:#8A8A7A;text-transform:uppercase;padding:14px 0 8px}
+.receipt-item{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #EDE8E0}
+.receipt-item:last-child{border-bottom:none}
+.receipt-item-left{display:flex;align-items:center;gap:8px}
+.receipt-item-name{font-size:14px;font-weight:500;color:#1A1A1A}
+.receipt-item-desc{font-size:11px;color:#8A8A7A}
+.receipt-item-pct{font-size:16px;font-weight:500}
+.receipt-bar-wrap{height:8px;background:#EDE8E0;border-radius:4px;overflow:hidden;margin:16px 0 4px}
+.receipt-bar-seg{height:100%;display:inline-block;transition:width .3s}
+.receipt-legend{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:4px}
+.receipt-leg-item{display:flex;align-items:center;gap:4px;font-size:10px;color:#8A8A7A}
+.receipt-leg-dot{width:8px;height:8px;border-radius:50%}
+.receipt-bottom{background:#0C1810;padding:16px 24px;text-align:center}
+.receipt-no{font-size:10px;letter-spacing:.15em;color:#3A5A3A;margin-bottom:4px}
+.receipt-tagline{font-size:11px;color:#5A7A5A;letter-spacing:.06em}
+@media print{
+  body{background:#fff!important}
+  .screen{position:static!important;overflow:visible!important}
+  #s-receipt{display:block!important}
+  .screen:not(#s-receipt){display:none!important}
+  .receipt-wrap{box-shadow:none}
+  button{display:none!important}
+}
 .done-title{font-size:1.9rem;font-weight:300;margin-bottom:10px}
 .done-sub{font-size:.95rem;color:var(--cr3);line-height:1.85;max-width:360px;margin-bottom:28px}
 .recipe-card{background:var(--bg3);border:1px solid var(--brd);border-radius:4px;padding:18px 22px;max-width:400px;width:100%;margin-bottom:28px;text-align:left;animation:scaleIn .4s ease both}
@@ -252,7 +286,42 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
   <h2 class="done-title">레시피 완성!</h2>
   <p class="done-sub">직원에게 이 화면을 보여주세요.<br>나만의 배합 향료로 제작해 드립니다 ✦</p>
   <div class="recipe-card" id="done-recipe"></div>
-  <button class="btn-g" onclick="reset()" style="max-width:400px;padding:16px">새로 시작하기</button>
+  <div style="display:flex;flex-direction:column;gap:10px;max-width:400px;width:100%">
+    <button class="btn-g" onclick="goOrder()" style="padding:18px;font-size:1.05rem">주문하기 →</button>
+    <button onclick="reset()" style="background:none;border:1px solid rgba(200,162,90,.2);color:var(--cr3);font-family:inherit;font-size:.9rem;padding:12px;border-radius:2px;cursor:pointer">새로 시작하기</button>
+  </div>
+</div>
+
+<!-- ══ ORDER ══ -->
+<div id="s-order" class="screen hidden">
+  <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem 2rem;text-align:center">
+    <div style="font-size:11px;letter-spacing:.22em;color:#5A8A5A;text-transform:uppercase;margin-bottom:16px">주문자 정보</div>
+    <h2 style="font-size:1.8rem;font-weight:300;color:var(--cr);margin-bottom:8px">이름을 입력해주세요</h2>
+    <p style="font-size:.9rem;color:var(--cr3);margin-bottom:36px">영수증에 표시됩니다</p>
+    <input id="order-name" type="text" placeholder="홍길동" maxlength="10"
+      style="width:100%;max-width:360px;padding:18px 20px;background:rgba(255,255,255,.05);border:1px solid rgba(200,162,90,.3);border-radius:2px;color:var(--cr);font-family:inherit;font-size:1.2rem;text-align:center;outline:none;margin-bottom:12px"
+      oninput="checkName()">
+    <div style="display:flex;flex-direction:column;gap:10px;max-width:360px;width:100%;margin-top:8px">
+      <button id="order-confirm" class="btn-dim" onclick="makeReceipt()" style="padding:18px;font-size:1rem">이름을 입력해주세요</button>
+      <button onclick="goTo('s-done')" style="background:none;border:1px solid rgba(200,162,90,.2);color:var(--cr3);font-family:inherit;font-size:.9rem;padding:12px;border-radius:2px;cursor:pointer">← 이전</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ RECEIPT ══ -->
+<div id="s-receipt" class="screen hidden">
+  <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:2.5rem 1.5rem 6rem">
+
+    <div id="receipt-body" style="max-width:420px;width:100%">
+      <!-- 영수증 내용 JS로 채워짐 -->
+    </div>
+
+    <div style="max-width:420px;width:100%;display:flex;flex-direction:column;gap:10px;margin-top:20px">
+      <button onclick="saveImage()" id="save-btn" style="background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0C1810;border:none;font-family:inherit;font-size:1rem;font-weight:500;padding:18px;border-radius:2px;cursor:pointer;letter-spacing:.06em">📸 이미지로 저장</button>
+      <button onclick="printReceipt()" style="background:none;border:1px solid rgba(200,162,90,.3);color:var(--gold);font-family:inherit;font-size:.9rem;padding:14px;border-radius:2px;cursor:pointer;letter-spacing:.06em">🖨 인쇄</button>
+      <button class="btn-g" onclick="reset()" style="padding:16px;background:none;border:1px solid rgba(200,162,90,.15);color:var(--cr3)">새로 시작하기</button>
+    </div>
+  </div>
 </div>
 
 </div><!-- /app -->
@@ -872,6 +941,173 @@ function finalize(){
 }
 
 goTo('s-land');
+
+function goOrder(){
+  document.getElementById('order-name').value='';
+  document.getElementById('order-confirm').className='btn-dim';
+  document.getElementById('order-confirm').textContent='이름을 입력해주세요';
+  goTo('s-order');
+  setTimeout(()=>document.getElementById('order-name').focus(),400);
+}
+
+function checkName(){
+  const v=document.getElementById('order-name').value.trim();
+  const btn=document.getElementById('order-confirm');
+  if(v.length>0){
+    btn.className='btn-g';btn.style.width='100%';btn.textContent=`${v} 님의 레시피 영수증 발급 →`;
+  } else {
+    btn.className='btn-dim';btn.textContent='이름을 입력해주세요';
+  }
+}
+
+function makeReceipt(){
+  const name=document.getElementById('order-name').value.trim();
+  if(!name) return;
+
+  const now=new Date();
+  const dateStr=`${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')}`;
+  const timeStr=`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  const orderNo=`RB-${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}-${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}`;
+
+  const sel=state.picked.map(id=>{const f=FRAGS.find(x=>x.id===id);return{f,v:state.blends[id]||0};}).sort((a,b)=>b.v-a.v);
+  const topFm=FAM[state.recipe.topFam];
+  const secFm=FAM[state.recipe.secondFam];
+
+  // 답변 요약 (상위 3개)
+  const ansLabels=Object.values(state.answerLabels).slice(0,3).map(l=>l.replace(/^[^\s]+\s/,'')).join(' · ');
+
+  const rb=document.getElementById('receipt-body');
+  rb.innerHTML=`
+  <div class="receipt-wrap">
+
+    <!-- 상단 헤더 -->
+    <div class="receipt-top">
+      <div class="receipt-brand">RE:IBORN by ACUD</div>
+      <div class="receipt-title">향 레시피 영수증</div>
+      <div class="receipt-date">${dateStr} ${timeStr} &nbsp;·&nbsp; ${orderNo}</div>
+    </div>
+
+    <!-- 중간 정보 -->
+    <div class="receipt-mid">
+
+      <div class="receipt-name-row">
+        <span class="receipt-label">주문자</span>
+        <span class="receipt-value" style="font-size:18px">${name} 님</span>
+      </div>
+
+      <div class="receipt-fam-row">
+        <span class="receipt-label">향 프로필</span>
+        <span class="receipt-value">
+          <span style="color:${topFm.c}">${topFm.e} ${topFm.l}</span>
+          <span style="color:#C8C0B0;margin:0 4px">+</span>
+          <span style="color:${secFm.c}">${secFm.e} ${secFm.l}</span>
+        </span>
+      </div>
+
+      <div class="receipt-fam-row">
+        <span class="receipt-label">공간 감성</span>
+        <span class="receipt-value" style="font-size:12px;color:#5A5A4A;text-align:right;max-width:220px;line-height:1.4">${ansLabels}</span>
+      </div>
+
+      <!-- 비율 바 -->
+      <div class="receipt-sec">배합 비율</div>
+      <div class="receipt-bar-wrap">
+        ${sel.map(({f,v})=>`<span class="receipt-bar-seg" style="width:${v}%;background:${FAM[f.f].c}"></span>`).join('')}
+      </div>
+      <div class="receipt-legend">
+        ${sel.map(({f,v})=>`<div class="receipt-leg-item"><div class="receipt-leg-dot" style="background:${FAM[f.f].c}"></div>${f.n} ${v}%</div>`).join('')}
+      </div>
+
+      <!-- 향료 리스트 -->
+      <div class="receipt-sec">향료 구성</div>
+      ${sel.map(({f,v})=>{
+        const fm=FAM[f.f];
+        const noteLabel={top:'탑',mid:'미들',base:'베이스'}[f.nt];
+        return`<div class="receipt-item">
+          <div class="receipt-item-left">
+            <span style="font-size:16px">${fm.e}</span>
+            <div>
+              <div class="receipt-item-name">${f.n}</div>
+              <div class="receipt-item-desc">${f.d} · ${noteLabel} 노트</div>
+            </div>
+          </div>
+          <div class="receipt-item-pct" style="color:${fm.c}">${v}%</div>
+        </div>`;
+      }).join('')}
+    </div>
+
+    <!-- 하단 -->
+    <div class="receipt-bottom">
+      <div class="receipt-no">${orderNo}</div>
+      <div class="receipt-tagline">나의 공간을 위한 단 하나의 향 ✦ RE:IBORN</div>
+    </div>
+
+  </div>`;
+
+  goTo('s-receipt');
+}
+
+function printReceipt(){
+  window.print();
+}
+
+async function saveImage(){
+  const btn = document.getElementById('save-btn');
+  btn.textContent = '⏳ 이미지 생성 중...';
+  btn.style.opacity = '.7';
+  btn.disabled = true;
+
+  try {
+    const target = document.getElementById('receipt-body');
+    const canvas = await html2canvas(target, {
+      scale: 3,               // 고해상도
+      useCORS: true,
+      backgroundColor: null,
+      logging: false,
+    });
+
+    // 이미지 다운로드
+    const name = document.getElementById('order-name')?.value.trim() || 'recipe';
+    const now = new Date();
+    const dateStr = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
+    const filename = `REIBORN_${name}_${dateStr}.png`;
+
+    // iOS Safari 대응 — 새 탭으로 열기
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    if(isIOS){
+      const imgData = canvas.toDataURL('image/png');
+      const w = window.open();
+      w.document.write(`
+        <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+        <style>body{margin:0;background:#111;display:flex;flex-direction:column;align-items:center;padding:20px;gap:16px}
+        img{max-width:100%;border-radius:8px}
+        p{color:#aaa;font-size:14px;font-family:sans-serif;text-align:center;line-height:1.6}</style></head>
+        <body>
+        <p>이미지를 <b>꾹 눌러서</b> 사진 앱에 저장하세요</p>
+        <img src="${imgData}">
+        </body></html>
+      `);
+      w.document.close();
+    } else {
+      // Android / PC — 직접 다운로드
+      const link = document.createElement('a');
+      link.download = filename;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+
+    btn.textContent = '📸 이미지로 저장';
+    btn.style.opacity = '1';
+    btn.disabled = false;
+
+  } catch(e) {
+    console.error(e);
+    btn.textContent = '저장 실패 — 다시 시도해주세요';
+    btn.style.opacity = '1';
+    btn.disabled = false;
+  }
+}
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </body>
 </html>
