@@ -252,17 +252,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
   <h2 class="done-title">레시피 완성!</h2>
   <p class="done-sub">직원에게 이 화면을 보여주세요.<br>나만의 배합 향료로 제작해 드립니다 ✦</p>
   <div class="recipe-card" id="done-recipe"></div>
-
-  <!-- 이메일 전송 영역 -->
-  <div id="email-section" style="max-width:400px;width:100%;margin-bottom:20px">
-    <div style="font-size:11px;letter-spacing:.15em;color:#5A8A5A;text-transform:uppercase;margin-bottom:10px">레시피를 이메일로 받아보기</div>
-    <div style="display:flex;gap:8px">
-      <input id="user-email" type="email" placeholder="이메일 주소 입력" style="flex:1;padding:14px 16px;background:rgba(255,255,255,.05);border:1px solid rgba(200,162,90,.25);border-radius:2px;color:#E2D9C4;font-family:inherit;font-size:14px;outline:none">
-      <button onclick="sendEmail()" id="send-btn" style="padding:14px 18px;background:linear-gradient(135deg,#C8A25A,#A87840);color:#0C1810;border:none;border-radius:2px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;white-space:nowrap">전송</button>
-    </div>
-    <div id="email-status" style="font-size:12px;margin-top:8px;min-height:18px;text-align:center"></div>
-  </div>
-
   <button class="btn-g" onclick="reset()" style="max-width:400px;padding:16px">새로 시작하기</button>
 </div>
 
@@ -875,16 +864,6 @@ function goBlend(){autoBalance();switchTab('blend');document.getElementById('s-r
 function finalize(){
   const rc=document.getElementById('done-recipe');
   const sel=state.picked.map(id=>{const f=FRAGS.find(x=>x.id===id);return{f,v:state.blends[id]||0};}).sort((a,b)=>b.v-a.v);
-  _lastRecipe = sel;  // 이메일 전송용 캐시
-
-  // 이메일 입력창 초기화
-  const emailInput = document.getElementById('user-email');
-  const emailStatus = document.getElementById('email-status');
-  const sendBtn = document.getElementById('send-btn');
-  if(emailInput) emailInput.value = '';
-  if(emailStatus) emailStatus.textContent = '';
-  if(sendBtn){ sendBtn.textContent='전송'; sendBtn.style.opacity='1'; sendBtn.disabled=false; sendBtn.style.background='linear-gradient(135deg,#C8A25A,#A87840)'; sendBtn.style.color='#0C1810'; }
-
   const topFm = FAM[state.recipe.topFam];
   document.getElementById('done-ring').style.cssText=`width:110px;height:110px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:44px;margin-bottom:26px;animation:glow 2.2s ease infinite;background:${topFm.bg};border:2px solid ${topFm.c}`;
   rc.innerHTML=`<div class="rc-title">나의 향 배합 레시피</div>`+
@@ -893,86 +872,6 @@ function finalize(){
 }
 
 goTo('s-land');
-</script>
-<!-- EmailJS SDK -->
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script>
-// ════════════════════════════════════════
-// EmailJS 설정
-// ★ 아래 3개 값을 EmailJS 계정에서 발급받은 값으로 교체하세요
-// ════════════════════════════════════════
-const EJS = {
-  publicKey:  'mrzMd2EUtJ-4JTrRv',
-  serviceId:  'service_pcre2bu',
-  templateId: 'template_891smi',
-};
-emailjs.init({ publicKey: EJS.publicKey });
-
-// 현재 레시피 캐시 (finalize에서 저장)
-let _lastRecipe = null;
-
-function sendEmail() {
-  const userEmail = document.getElementById('user-email').value.trim();
-  const status    = document.getElementById('email-status');
-  const btn       = document.getElementById('send-btn');
-
-  if(!_lastRecipe) return;
-
-  // 이메일 형식 검증
-  if(userEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userEmail)) {
-    status.style.color = '#CF4A4A';
-    status.textContent = '올바른 이메일 주소를 입력해주세요';
-    return;
-  }
-
-  btn.textContent = '전송 중...';
-  btn.style.opacity = '.6';
-  btn.disabled = true;
-
-  // 전송 데이터 구성
-  const now     = new Date();
-  const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-  const answers = Object.values(state.answerLabels).join(' / ');
-  const recipe  = _lastRecipe.map(({f,v}) => `${FAM[f.f].e} ${f.n} ${v}%`).join('\n');
-  const topFams = `${FAM[state.recipe.topFam].l} + ${FAM[state.recipe.secondFam].l}`;
-
-  const templateParams = {
-    to_email:   'kangjaechoi0@gmail.com',
-    reply_to:   userEmail || 'noreply@reiborn.com',
-    name:       userEmail ? userEmail : 'RE:IBORN 키오스크',
-    email:      userEmail || 'noreply@reiborn.com',
-    title:      `레시피 접수 — ${dateStr}`,
-    message:
-`📅 일시: ${dateStr}
-📧 고객 이메일: ${userEmail || '(미입력)'}
-🌿 주요 향 패밀리: ${topFams}
-
-📝 선택 답변:
-${answers}
-
-🧪 최종 배합 레시피:
-${recipe}`,
-  };
-
-  emailjs.send(EJS.serviceId, EJS.templateId, templateParams)
-    .then(() => {
-      status.style.color = '#2A9970';
-      status.textContent = userEmail
-        ? `✓ ${userEmail} 로 레시피를 전송했습니다`
-        : '✓ 레시피가 에이쿠드로 전달되었습니다';
-      btn.textContent = '전송 완료 ✓';
-      btn.style.background = 'linear-gradient(135deg,#2A9970,#1A7050)';
-      btn.style.color = '#fff';
-    })
-    .catch(err => {
-      console.error(err);
-      status.style.color = '#CF4A4A';
-      status.textContent = '전송 실패 — EmailJS 설정을 확인해주세요';
-      btn.textContent = '전송';
-      btn.style.opacity = '1';
-      btn.disabled = false;
-    });
-}
 </script>
 </body>
 </html>
